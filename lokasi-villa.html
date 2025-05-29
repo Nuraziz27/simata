@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lokasi Vila - WISATA YUK!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --bpn-blue: #0047ab;
+            --bpn-yellow: #ffd700;
+        }
+        .bpn-header {
+            background-color: var(--bpn-blue);
+            color: white;
+            padding: 15px 0;
+            border-bottom: 4px solid var(--bpn-yellow);
+        }
+        .bpn-logo {
+            height: 60px;
+        }
+        .bpn-nav {
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .bpn-nav-link {
+            color: var(--bpn-blue) !important;
+            font-weight: 500;
+            padding: 15px 20px !important;
+        }
+        .bpn-footer {
+            background-color: var(--bpn-blue);
+            color: white;
+            padding: 40px 0;
+        }
+        .login-btn {
+            background-color: var(--bpn-yellow);
+            color: var(--bpn-blue);
+            font-weight: bold;
+        }
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .dropdown-item {
+            color: var(--bpn-blue);
+            padding: 10px 20px;
+        }
+        .dropdown-item:hover {
+            background-color: rgba(0,71,171,0.1);
+        }
+        
+        /* Leaflet Map Styles */
+        #villaMap {
+            height: 600px;
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .map-container {
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+        .map-title {
+            color: var(--bpn-blue);
+            margin-bottom: 20px;
+        }
+        .wisata-info {
+            margin-top: 20px;
+        }
+        .page-hero {
+            background-color: var(--bpn-blue);
+            color: white;
+            padding: 50px 0;
+            margin-bottom: 30px;
+        }
+        .villa-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+        }
+        .villa-card:hover {
+            transform: translateY(-5px);
+        }
+        .villa-img {
+            height: 200px;
+            object-fit: cover;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .villa-icon {
+            color: var(--bpn-yellow);
+            margin-right: 5px;
+        }
+        .price-tag {
+            background-color: var(--bpn-blue);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bpn-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center">
+                        <img src="https://www.atrbpn.go.id/Resource/Image/logo-bpn.png" alt="Logo WISATA YUK!" class="bpn-logo me-3">
+                        <div>
+                            <h1 class="mb-0">WISATA YUK!</h1>
+                            <p class="mb-0">Informasi Pariwisata</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <a href="#" class="btn btn-sm login-btn me-2"><i class="fas fa-user me-1"></i> Login</a>
+                    <a href="#" class="btn btn-sm btn-outline-light"><i class="fas fa-question-circle me-1"></i> Bantuan</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg bpn-nav">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link bpn-nav-link" href="index.html"><i class="fas fa-home me-1"></i> Beranda</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link bpn-nav-link dropdown-toggle" href="#" id="destinasiDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-map-marked-alt me-1"></i> Destinasi
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="destinasiDropdown">
+                            <li><a class="dropdown-item" href="lokasi-wisata.html"><i class="fas fa-location-dot me-2"></i> Lokasi Wisata</a></li>
+                           <li><a class="dropdown-item active" href="dokumentasi.html"><i class="fas fa-camera me-2" aria-hidden="true"></i> Dokumentasi</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link bpn-nav-link dropdown-toggle" href="#" id="akomodasiDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-file-alt me-1"></i> Akomodasi
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="akomodasiDropdown">
+                            <li><a class="dropdown-item" href="lokasi-hotel.html" onclick="tampilkanHotel()"><i class="fas fa-hotel me-2"></i> Hotel</a></li>
+                            <li><a class="dropdown-item" href="lokasi-villa.html" onclick="tampilkanVilla()"><i class="fas fa-home me-2"></i> Villa</a></li>
+                            <li><a class="dropdown-item" href="lokasi-homestay.html" onclick="tampilkanHomestay()"><i class="fas fa-bed me-2"></i> Homestay</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link bpn-nav-link" href="lokasi-kuliner.html"><i class="fas fa-utensils me-2"></i> Kuliner</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link bpn-nav-link active" href="event.html"><i class="fas fa-calendar-alt me-1" aria-hidden="true"></i> Event</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link bpn-nav-link" href="#"><i class="fas fa-info-circle me-1"></i> Informasi</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Hero -->
+    <section class="page-hero">
+        <div class="container text-center">
+            <h2 class="display-4 fw-bold mb-3">LOKASI VILA REKOMENDASI</h2>
+            <p class="lead">Temukan berbagai vila mewah dan nyaman di destinasi wisata populer Indonesia</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="map-container">
+            <div id="villaMap"></div>
+            <div class="wisata-info">
+                <h4 class="map-title">Lokasi Vila Populer</h4>
+                <p>Berikut adalah peta lokasi vila-vila rekomendasi yang dapat Anda sewa. Klik pada marker untuk melihat detail vila.</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Gunakan tombol zoom untuk memperbesar/memperkecil peta
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-md-12">
+                <h3 class="text-center mb-4">REKOMENDASI VILA</h3>
+                <div class="row">
+                    <!-- Villa Item 1 -->
+                    <div class="col-md-4">
+                        <div class="card villa-card">
+                            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img-top villa-img" alt="Vila Puncak">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-home villa-icon"></i> The Highland Park Villa</h5>
+                                <p class="card-text">Vila mewah di Puncak dengan pemandangan gunung dan kebun teh yang memukau.</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="price-tag">Rp 2.500.000/malam</span>
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-star"></i> 4.9</span>
+                                </div>
+                                <small class="text-muted"><i class="fas fa-map-marker-alt"></i> Puncak, Bogor</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Villa Item 2 -->
+                    <div class="col-md-4">
+                        <div class="card villa-card">
+                            <img src="https://images.unsplash.com/photo-1582719471381-971f8b3b779d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img-top villa-img" alt="Vila Bali">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-home villa-icon"></i> Bali Ocean View Villa</h5>
+                                <p class="card-text">Vila eksklusif di Uluwatu dengan kolam infinity menghadap Samudera Hindia.</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="price-tag">Rp 3.800.000/malam</span>
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-star"></i> 4.8</span>
+                                </div>
+                                <small class="text-muted"><i class="fas fa-map-marker-alt"></i> Uluwatu, Bali</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Villa Item 3 -->
+                    <div class="col-md-4">
+                        <div class="card villa-card">
+                            <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img-top villa-img" alt="Vila Bandung">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-home villa-icon"></i> Dago Resort Villa</h5>
+                                <p class="card-text">Vila modern di kawasan Dago dengan fasilitas lengkap dan pemandangan kota.</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="price-tag">Rp 1.800.000/malam</span>
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-star"></i> 4.7</span>
+                                </div>
+                                <small class="text-muted"><i class="fas fa-map-marker-alt"></i> Bandung</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <!-- Villa Item 4 -->
+                    <div class="col-md-4">
+                        <div class="card villa-card">
+                            <img src="https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img-top villa-img" alt="Vila Jogja">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-home villa-icon"></i> Kaliurang Mountain Villa</h5>
+                                <p class="card-text">Vila bernuansa alam di kaki Gunung Merapi dengan udara sejuk dan pemandangan hijau.</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="price-tag">Rp 1.200.000/malam</span>
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-star"></i> 4.6</span>
+                                </div>
+                                <small class="text-muted"><i class="fas fa-map-marker-alt"></i> Kaliurang, Yogyakarta</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Villa Item 5 -->
+                    <div class="col-md-4">
+                        <div class="card villa-card">
+                            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img-top villa-img" alt="Vila Lombok">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-home villa-icon"></i> Senggigi Beachfront Villa</h5>
+                                <p class="card-text">Vila tepi pantai dengan akses langsung ke pantai berpasir putih di Lombok.</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="price-tag">Rp 2.200.000/malam</span>
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-star"></i> 4.8</span>
+                                </div>
+                                <small class="text-muted"><i class="fas fa-map-marker-alt"></i> Senggigi, Lombok</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Villa Item 6 -->
+                    <div class="col-md-4">
+                        <div class="card villa-card">
+                            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img-top villa-img" alt="Vila Dieng">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-home villa-icon"></i> Dieng Plateau Villa</h5>
+                                <p class="card-text">Vila dengan konsep tradisional Jawa di kawasan dataran tinggi Dieng.</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="price-tag">Rp 1.500.000/malam</span>
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-star"></i> 4.5</span>
+                                </div>
+                                <small class="text-muted"><i class="fas fa-map-marker-alt"></i> Dieng, Wonosobo</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-md-6">
+                <div class="card bpn-card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-info-circle me-2 text-primary"></i> Informasi Vila</h5>
+                        <p>Temukan berbagai vila mewah dan nyaman di destinasi wisata populer Indonesia. Peta ini menampilkan lokasi-lokasi vila rekomendasi yang bisa Anda sewa untuk liburan.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bpn-card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-map-marked-alt me-2 text-primary"></i> Panduan Peta</h5>
+                        <ul>
+                            <li>Klik pada marker untuk melihat detail vila</li>
+                            <li>Gunakan tombol +/- untuk zoom in dan zoom out</li>
+                            <li>Drag peta untuk melihat area lain</li>
+                            <li>Harga yang tertera adalah perkiraan harga per malam</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bpn-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>KONTAK KAMI</h5>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> Jl. Banjarsari, Tembalang, Kota Semarang</p>
+                    <p><i class="fas fa-phone me-2"></i> 08998639593</p>
+                    <p><i class="fas fa-envelope me-2"></i> info@wisatayuk.go.id</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>TAUTAN CEPAT</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white">Kebijakan Privasi</a></li>
+                        <li><a href="#" class="text-white">Syarat dan Ketentuan</a></li>
+                        <li><a href="#" class="text-white">FAQ</a></li>
+                        <li><a href="#" class="text-white">Peta Situs</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>TERHUBUNG</h5>
+                    <a href="#" class="text-white me-2"><i class="fab fa-facebook-f fa-lg"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-twitter fa-lg"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-instagram fa-lg"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-youtube fa-lg"></i></a>
+                    <div class="mt-3">
+                        <img src="https://www.atrbpn.go.id/Resource/Image/logo-kemenpan.png" alt="Kemenpan RB" style="height: 50px;" class="me-2">
+                        <img src="https://www.atrbpn.go.id/Resource/Image/logo-gov.png" alt="Gov Indonesia" style="height: 50px;">
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4 bg-light">
+            <div class="text-center">
+                <p class="mb-0">© 2024 Kementerian Pariwisata - Republik Indonesia. Semua Hak Dilindungi.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize the map for villa locations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Coordinates for Indonesia (centered on Java)
+            const indonesiaCenter = [-7.2906, 112.7252];
+            
+            // Create the map
+            const map = L.map('villaMap').setView(indonesiaCenter, 6);
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Add markers for villa locations in Indonesia
+            const villaLocations = [
+                {
+                    name: "The Highland Park Villa",
+                    location: [-6.7424, 106.9643],
+                    description: "Vila mewah di Puncak dengan pemandangan gunung dan kebun teh. Harga: Rp 2.500.000/malam",
+                    rating: 4.9
+                },
+                {
+                    name: "Bali Ocean View Villa",
+                    location: [-8.8246, 115.0872],
+                    description: "Vila eksklusif di Uluwatu dengan kolam infinity. Harga: Rp 3.800.000/malam",
+                    rating: 4.8
+                },
+                {
+                    name: "Dago Resort Villa",
+                    location: [-6.8860, 107.6150],
+                    description: "Vila modern di kawasan Dago Bandung. Harga: Rp 1.800.000/malam",
+                    rating: 4.7
+                },
+                {
+                    name: "Kaliurang Mountain Villa",
+                    location: [-7.5939, 110.4247],
+                    description: "Vila bernuansa alam di kaki Gunung Merapi. Harga: Rp 1.200.000/malam",
+                    rating: 4.6
+                },
+                {
+                    name: "Senggigi Beachfront Villa",
+                    location: [-8.4897, 116.0419],
+                    description: "Vila tepi pantai dengan akses langsung ke pantai. Harga: Rp 2.200.000/malam",
+                    rating: 4.8
+                },
+                {
+                    name: "Dieng Plateau Villa",
+                    location: [-7.2098, 109.9054],
+                    description: "Vila dengan konsep tradisional Jawa di Dieng. Harga: Rp 1.500.000/malam",
+                    rating: 4.5
+                },
+                {
+                    name: "Villa de Daun",
+                    location: [-6.8815, 107.6080],
+                    description: "Vila minimalis di Bandung dengan taman yang asri. Harga: Rp 1.600.000/malam",
+                    rating: 4.7
+                },
+                {
+                    name: "Bukit Vista Seminyak",
+                    location: [-8.6834, 115.1624],
+                    description: "Vila privat di Seminyak dengan kolam pribadi. Harga: Rp 3.200.000/malam",
+                    rating: 4.9
+                }
+            ];
+            
+            // Custom icon for villa places
+            const villaIcon = L.icon({
+                iconUrl: 'https://cdn-icons-png.flaticon.com/512/619/619153.png',
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32]
+            });
+            
+            // Add markers to the map
+            villaLocations.forEach(loc => {
+                const marker = L.marker(loc.location, {icon: villaIcon}).addTo(map)
+                    .bindPopup(`<b>${loc.name}</b><br>${loc.description}<br><small>Rating: ${loc.rating} <i class="fas fa-star" style="color: gold;"></i></small>`);
+            });
+            
+            // Fit the map to the bounds of all markers
+            if (villaLocations.length > 0) {
+                const group = new L.featureGroup(villaLocations.map(loc => L.marker(loc.location)));
+                map.fitBounds(group.getBounds().pad(0.5));
+            }
+        });
+    </script>
+</body>
+</html>
